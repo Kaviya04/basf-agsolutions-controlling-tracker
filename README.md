@@ -37,4 +37,4 @@ Plain HTML/CSS/JS, [Chart.js](https://www.chartjs.org/) for the trend and ratio 
 
 ## Author
 
-Kaviya Gopal — MSc Financial Engineering & Management, KIT. Background in post-trade operations (JPMorgan CIB) and data analytics (TUI Group), applying to BASF's Controlling trainee track.
+Kaviya Gopal — MSc Financial Engineering & Management, KIT. Background in post-trade operations (JPMorgan CIB) and data analytics (Destination Solutions), applying to BASF's Controlling trainee track.
