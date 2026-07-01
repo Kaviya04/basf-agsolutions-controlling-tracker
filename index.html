@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BASF SE — Financial Performance & Controlling Review</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+  :root{
+    --paper:#F3EFE5;
+    --paper-raised:#FAF7F0;
+    --ink:#1E2B27;
+    --ink-soft:#3C4A45;
+    --steel:#3E6259;
+    --steel-dim:#7C978E;
+    --rust:#B5502F;
+    --moss:#75845F;
+    --line:#D9D1BF;
+    --muted:#847C69;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+    --serif: 'Source Serif 4', serif;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:1040px;
+    margin:0 auto;
+    padding:64px 28px 100px;
+  }
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--steel);
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .eyebrow::before{
+    content:"";
+    width:22px; height:1px;
+    background:var(--steel);
+    display:inline-block;
+  }
+  h1{
+    font-family:var(--serif);
+    font-weight:600;
+    font-size:clamp(30px,4.2vw,46px);
+    line-height:1.08;
+    margin:18px 0 14px;
+    letter-spacing:-0.01em;
+  }
+  .subhead{
+    font-size:16px;
+    color:var(--ink-soft);
+    max-width:640px;
+    line-height:1.55;
+    margin:0 0 8px;
+  }
+  .author-line{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--muted);
+    margin-top:18px;
+    padding-top:18px;
+    border-top:1px solid var(--line);
+  }
+
+  /* KPI strip */
+  .kpi-strip{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    margin-top:48px;
+    border-top:1px solid var(--ink);
+    border-bottom:1px solid var(--line);
+  }
+  .kpi{
+    padding:20px 18px 22px;
+    border-right:1px solid var(--line);
+  }
+  .kpi:last-child{border-right:none;}
+  .kpi-label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .kpi-value{
+    font-family:var(--mono);
+    font-size:28px;
+    font-weight:500;
+    letter-spacing:-0.01em;
+  }
+  .kpi-delta{
+    font-family:var(--mono);
+    font-size:12.5px;
+    margin-top:6px;
+  }
+  .delta-up{color:var(--steel);}
+  .delta-down{color:var(--rust);}
+
+  /* Sections */
+  section{margin-top:72px;}
+  .sec-head{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    border-bottom:1px solid var(--ink);
+    padding-bottom:10px;
+    margin-bottom:26px;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .sec-num{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--muted);
+  }
+  .sec-title{
+    font-family:var(--serif);
+    font-size:22px;
+    font-weight:600;
+    margin:0;
+  }
+  .sec-note{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--muted);
+  }
+  .commentary{
+    font-size:15px;
+    line-height:1.7;
+    color:var(--ink-soft);
+    max-width:700px;
+    margin-top:22px;
+  }
+  .commentary strong{color:var(--ink); font-weight:600;}
+  .commentary .tag{
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--steel);
+    display:block;
+    margin-bottom:8px;
+  }
+
+  .chart-card{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+    padding:24px 24px 12px;
+  }
+  .chart-card canvas{max-height:340px;}
+
+  /* Waterfall / ledger bridge */
+  .ledger{
+    background:var(--paper-raised);
+    border:1px solid var(--line);
+  }
+  .ledger-row{
+    display:grid;
+    grid-template-columns:34px 1fr 130px 220px;
+    align-items:center;
+    padding:11px 18px;
+    border-bottom:1px solid var(--line);
+    gap:14px;
+  }
+  .ledger-row:last-child{border-bottom:none;}
+  .ledger-row.total{
+    background:rgba(30,43,39,0.04);
+    font-weight:600;
+  }
+  .ledger-idx{
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--muted);
+  }
+  .ledger-label{
+    font-family:var(--sans);
+    font-size:13.5px;
+    color:var(--ink);
+  }
+  .ledger-val{
+    font-family:var(--mono);
+    font-size:13.5px;
+    text-align:right;
+    color:var(--ink);
+  }
+  .ledger-val.neg{color:var(--rust);}
+  .ledger-val.pos{color:var(--steel);}
+  .ledger-bar-track{
+    height:8px;
+    background:var(--line);
+    position:relative;
+    border-radius:1px;
+  }
+  .ledger-bar{
+    position:absolute;
+    top:0; bottom:0;
+    background:var(--steel);
+    border-radius:1px;
+  }
+  .ledger-bar.neg{background:var(--rust);}
+
+  /* small multiples */
+  .grid-2{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+    margin-top:22px;
+  }
+  @media (max-width:720px){
+    .grid-2{grid-template-columns:1fr;}
+    .kpi-strip{grid-template-columns:1fr 1fr;}
+    .kpi{border-bottom:1px solid var(--line);}
+    .ledger-row{grid-template-columns:24px 1fr 90px 90px;}
+  }
+
+  footer{
+    margin-top:90px;
+    padding-top:24px;
+    border-top:1px solid var(--ink);
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--muted);
+    line-height:1.8;
+  }
+  footer a{color:var(--steel);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">FY2008 – FY2025 · BASF SE, Ludwigshafen</div>
+  <h1>Financial Performance &amp; Controlling Review</h1>
+  <p class="subhead">An operational read on eighteen years of BASF SE reported financials — built the way a controlling analyst would frame it: trend, bridge, and balance sheet strength, with commentary on what moved and why.</p>
+  <div class="author-line">Prepared by Kaviya Gopal — for the START IN Finance &amp; Controlling Trainee Programme application</div>
+
+  <!-- KPI STRIP -->
+  <div class="kpi-strip" id="kpiStrip"></div>
+
+  <!-- SECTION 1: TREND -->
+  <section>
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">01</div>
+        <h2 class="sec-title">Revenue &amp; margin trend</h2>
+      </div>
+      <div class="sec-note">EUR million · FY2008–FY2025</div>
+    </div>
+    <div class="chart-card">
+      <canvas id="trendChart"></canvas>
+    </div>
+    <div class="commentary">
+      <span class="tag">Reading</span>
+      Revenue has been range-bound between roughly <strong>€57–87bn</strong> for a decade, but the shape of the last four years is the story: FY2022's <strong>€87.3bn</strong> peak — inflated by post-pandemic price pass-through and energy cost recovery — gave way to a <strong>32% decline to €59.7bn by FY2025</strong>, as European chemical demand softened and pricing normalized. EBIT margin tells a more encouraging second half: after bottoming near zero in FY2020 and again compressing to <strong>2.8–3.3%</strong> through the FY2022–24 downturn, it recovered to <strong>4.3% in FY2025</strong> — margin expansion arriving <em>despite</em> falling revenue, which only happens through cost discipline, not volume recovery.
+    </div>
+  </section>
+
+  <!-- SECTION 2: BRIDGE -->
+  <section>
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">02</div>
+        <h2 class="sec-title">FY2025 P&amp;L bridge</h2>
+      </div>
+      <div class="sec-note">EUR million · vs. FY2024, line items as reported</div>
+    </div>
+    <div class="ledger" id="ledgerBridge"></div>
+    <div class="commentary">
+      <span class="tag">Reading</span>
+      Revenue fell <strong>€5.6bn (-8.6%)</strong> year-on-year, and gross profit followed it down by <strong>€2.8bn</strong> — cost of revenue did not scale down proportionally with sales, which is typical when fixed manufacturing costs sit under a shrinking top line. The offset came below the gross profit line: <strong>SG&amp;A was cut by €1.4bn</strong>, roughly <strong>14%</strong>, enough on its own to outweigh over half the gross profit decline. Combined with a smaller R&amp;D reduction, operating expense discipline is the reason <strong>EBIT rose €0.5bn to €2.56bn even as revenue fell</strong> — a controlling-driven result, not a demand-driven one.
+    </div>
+  </section>
+
+  <!-- SECTION 3: BALANCE SHEET -->
+  <section>
+    <div class="sec-head">
+      <div>
+        <div class="sec-num">03</div>
+        <h2 class="sec-title">Balance sheet strength</h2>
+      </div>
+      <div class="sec-note">Equity ratio &amp; leverage, FY2008–FY2025</div>
+    </div>
+    <div class="grid-2">
+      <div class="chart-card"><canvas id="equityChart"></canvas></div>
+      <div class="chart-card"><canvas id="leverageChart"></canvas></div>
+    </div>
+    <div class="commentary">
+      <span class="tag">Reading</span>
+      The equity ratio held in the healthy <strong>44–49% range</strong> through the FY2021–22 peak, but has eroded for three straight years to <strong>44.0% in FY2025</strong> as retained earnings absorbed weaker net income while the balance sheet didn't shrink as fast as equity did. Net debt has climbed steadily since FY2021 — from <strong>€16.5bn to €21.8bn</strong> — while EBITDA compressed, pushing <strong>net debt/EBITDA from 1.5x to 3.5x</strong>. That's the leverage-side counterpart to the cost story above: SG&amp;A cuts are protecting EBIT margin, but the balance sheet is carrying more debt against a smaller earnings base, which is the kind of tension a controlling function exists to flag and manage — not just report.
+    </div>
+  </section>
+
+  <footer>
+    Source: BASF SE standalone financial statements (income statement &amp; balance sheet), FY2008–FY2025, EUR.<br>
+    Methodology: all figures derived directly from reported line items — no estimates or restatements. Ratios computed as: Equity ratio = Total Equity / Total Assets; Net debt = Short-term + Long-term debt − Cash; Net debt/EBITDA = Net debt / EBITDA.<br>
+    Built with Python (data processing) and Chart.js (visualization) · repo: github.com/&lt;your-username&gt;/basf-controlling-review
+  </footer>
+
+</div>
+
+<script id="basf-data" type="application/json">
+[{"year":2008,"revenue":62304.0,"cogs":46455.0,"gross_profit":15849.0,"sga":6835.0,"rnd":1355.0,"opex":8938.0,"ebit":6463.0,"other_income":-688.0,"da":3180.0,"ebitda":9342.0,"ebt":5976.0,"tax":2671.0,"net_income":2912.0,"total_assets":50860.0,"total_equity":18722.0,"total_liabilities":32138.0,"net_debt":11818.0,"equity_ratio":36.8,"ebit_margin":10.4,"ebitda_margin":15.0,"net_margin":4.7,"current_ratio":1.3,"net_debt_ebitda":1.3,"working_capital":14159.0,"wc_pct_rev":22.7,"roe":15.6},{"year":2009,"revenue":50693.0,"cogs":36682.0,"gross_profit":14011.0,"sga":6800.0,"rnd":1398.0,"opex":9391.0,"ebit":3677.0,"other_income":-598.0,"da":3740.0,"ebitda":7643.0,"ebt":3079.0,"tax":1424.0,"net_income":1410.0,"total_assets":51268.0,"total_equity":18609.0,"total_liabilities":32659.0,"net_debt":13064.0,"equity_ratio":36.3,"ebit_margin":7.3,"ebitda_margin":15.1,"net_margin":2.8,"current_ratio":1.7,"net_debt_ebitda":1.7,"working_capital":13396.0,"wc_pct_rev":26.4,"roe":7.6},{"year":2010,"revenue":63873.0,"cogs":45310.0,"gross_profit":18563.0,"sga":7838.0,"rnd":1492.0,"opex":10191.0,"ebit":7761.0,"other_income":-388.0,"da":3393.0,"ebitda":11702.0,"ebt":7373.0,"tax":2299.0,"net_income":4557.0,"total_assets":59393.0,"total_equity":22657.0,"total_liabilities":36736.0,"net_debt":13605.0,"equity_ratio":38.1,"ebit_margin":12.2,"ebitda_margin":18.3,"net_margin":7.1,"current_ratio":1.6,"net_debt_ebitda":1.2,"working_capital":18507.0,"wc_pct_rev":29.0,"roe":20.1},{"year":2011,"revenue":73497.0,"cogs":53986.0,"gross_profit":19511.0,"sga":8638.0,"rnd":1605.0,"opex":10449.0,"ebit":8586.0,"other_income":336.0,"da":3419.0,"ebitda":14084.0,"ebt":8970.0,"tax":2367.0,"net_income":6188.0,"total_assets":61175.0,"total_equity":25385.0,"total_liabilities":35790.0,"net_debt":10864.0,"equity_ratio":41.5,"ebit_margin":11.7,"ebitda_margin":19.2,"net_margin":8.4,"current_ratio":1.6,"net_debt_ebitda":0.8,"working_capital":18433.0,"wc_pct_rev":25.1,"roe":24.4},{"year":2012,"revenue":78729.0,"cogs":58022.0,"gross_profit":20707.0,"sga":9036.0,"rnd":1746.0,"opex":11151.0,"ebit":8976.0,"other_income":-2999.0,"da":3561.0,"ebitda":10185.0,"ebt":8436.0,"tax":3214.0,"net_income":4819.0,"total_assets":64327.0,"total_equity":25804.0,"total_liabilities":38523.0,"net_debt":11094.0,"equity_ratio":40.1,"ebit_margin":11.4,"ebitda_margin":12.9,"net_margin":6.1,"current_ratio":1.7,"net_debt_ebitda":1.1,"working_capital":15522.0,"wc_pct_rev":19.7,"roe":18.7},{"year":2013,"revenue":73973.0,"cogs":55483.0,"gross_profit":18490.0,"sga":8789.0,"rnd":1835.0,"opex":11363.0,"ebit":7273.0,"other_income":-673.0,"da":3196.0,"ebitda":10872.0,"ebt":6713.0,"tax":1540.0,"net_income":4792.0,"total_assets":64382.0,"total_equity":27789.0,"total_liabilities":36593.0,"net_debt":13426.0,"equity_ratio":43.2,"ebit_margin":9.8,"ebitda_margin":14.7,"net_margin":6.5,"current_ratio":1.8,"net_debt_ebitda":1.2,"working_capital":16068.0,"wc_pct_rev":21.7,"roe":17.2},{"year":2014,"revenue":74326.0,"cogs":55839.0,"gross_profit":18487.0,"sga":8852.0,"rnd":1884.0,"opex":11436.0,"ebit":7626.0,"other_income":-423.0,"da":3455.0,"ebitda":11045.0,"ebt":7203.0,"tax":1711.0,"net_income":5155.0,"total_assets":71359.0,"total_equity":28195.0,"total_liabilities":43164.0,"net_debt":14691.0,"equity_ratio":39.5,"ebit_margin":10.3,"ebitda_margin":14.9,"net_margin":6.9,"current_ratio":1.7,"net_debt_ebitda":1.3,"working_capital":17743.0,"wc_pct_rev":23.9,"roe":18.3},{"year":2015,"revenue":70449.0,"cogs":51372.0,"gross_profit":19077.0,"sga":9491.0,"rnd":1953.0,"opex":12666.0,"ebit":6248.0,"other_income":-700.0,"da":4448.0,"ebitda":10901.0,"ebt":5548.0,"tax":1247.0,"net_income":3987.0,"total_assets":70836.0,"total_equity":31545.0,"total_liabilities":39291.0,"net_debt":13634.0,"equity_ratio":44.5,"ebit_margin":8.9,"ebitda_margin":15.5,"net_margin":5.7,"current_ratio":1.7,"net_debt_ebitda":1.3,"working_capital":16708.0,"wc_pct_rev":23.7,"roe":12.6},{"year":2016,"revenue":57550.0,"cogs":39265.0,"gross_profit":18285.0,"sga":9101.0,"rnd":1863.0,"opex":11684.0,"ebit":6275.0,"other_income":-880.0,"da":3936.0,"ebitda":9824.0,"ebt":5395.0,"tax":1140.0,"net_income":4056.0,"total_assets":76496.0,"total_equity":32568.0,"total_liabilities":43928.0,"net_debt":15522.0,"equity_ratio":42.6,"ebit_margin":10.9,"ebitda_margin":17.1,"net_margin":7.0,"current_ratio":1.7,"net_debt_ebitda":1.6,"working_capital":17625.0,"wc_pct_rev":30.6,"roe":12.5},{"year":2017,"revenue":64475.0,"cogs":43929.0,"gross_profit":20546.0,"sga":9674.0,"rnd":1888.0,"opex":12361.0,"ebit":8522.0,"other_income":-705.0,"da":4202.0,"ebitda":11652.0,"ebt":7800.0,"tax":1448.0,"net_income":6078.0,"total_assets":78768.0,"total_equity":34756.0,"total_liabilities":44012.0,"net_debt":12156.0,"equity_ratio":44.1,"ebit_margin":13.2,"ebitda_margin":18.1,"net_margin":9.4,"current_ratio":2.1,"net_debt_ebitda":1.0,"working_capital":17859.0,"wc_pct_rev":27.7,"roe":17.5},{"year":2018,"revenue":62675.0,"cogs":44319.0,"gross_profit":18356.0,"sga":10014.0,"rnd":2028.0,"opex":12235.0,"ebit":6033.0,"other_income":-741.0,"da":2943.0,"ebitda":8650.0,"ebt":5288.0,"tax":1138.0,"net_income":4707.0,"total_assets":86556.0,"total_equity":36109.0,"total_liabilities":50447.0,"net_debt":19137.0,"equity_ratio":41.7,"ebit_margin":9.6,"ebitda_margin":13.8,"net_margin":7.5,"current_ratio":1.9,"net_debt_ebitda":2.2,"working_capital":19032.0,"wc_pct_rev":30.4,"roe":13.0},{"year":2019,"revenue":59316.0,"cogs":43061.0,"gross_profit":16255.0,"sga":9222.0,"rnd":2158.0,"opex":11954.0,"ebit":4052.0,"other_income":-899.0,"da":3660.0,"ebitda":7574.0,"ebt":3302.0,"tax":756.0,"net_income":2546.0,"total_assets":86950.0,"total_equity":42350.0,"total_liabilities":44600.0,"net_debt":17954.0,"equity_ratio":48.7,"ebit_margin":6.8,"ebitda_margin":12.8,"net_margin":4.3,"current_ratio":1.9,"net_debt_ebitda":2.4,"working_capital":16698.0,"wc_pct_rev":28.2,"roe":6.0},{"year":2020,"revenue":59149.0,"cogs":44040.0,"gross_profit":15109.0,"sga":8725.0,"rnd":2086.0,"opex":14244.0,"ebit":233.0,"other_income":-1753.0,"da":3805.0,"ebitda":3573.0,"ebt":-1562.0,"tax":-91.0,"net_income":-1471.0,"total_assets":80292.0,"total_equity":34398.0,"total_liabilities":45894.0,"net_debt":16864.0,"equity_ratio":42.8,"ebit_margin":0.4,"ebitda_margin":6.0,"net_margin":-2.5,"current_ratio":1.8,"net_debt_ebitda":4.7,"working_capital":15779.0,"wc_pct_rev":26.7,"roe":-4.3},{"year":2021,"revenue":78598.0,"cogs":58801.0,"gross_profit":19797.0,"sga":9822.0,"rnd":2216.0,"opex":12042.0,"ebit":7677.0,"other_income":-229.0,"da":3800.0,"ebitda":10837.0,"ebt":7448.0,"tax":1430.0,"net_income":5523.0,"total_assets":87383.0,"total_equity":42081.0,"total_liabilities":45302.0,"net_debt":16512.0,"equity_ratio":48.2,"ebit_margin":9.8,"ebitda_margin":13.8,"net_margin":7.0,"current_ratio":1.7,"net_debt_ebitda":1.5,"working_capital":20208.0,"wc_pct_rev":25.7,"roe":13.1},{"year":2022,"revenue":87327.0,"cogs":66260.0,"gross_profit":21067.0,"sga":11133.0,"rnd":2298.0,"opex":14100.0,"ebit":2471.0,"other_income":-1281.0,"da":3886.0,"ebitda":10216.0,"ebt":1190.0,"tax":1581.0,"net_income":-391.0,"total_assets":84472.0,"total_equity":40923.0,"total_liabilities":43549.0,"net_debt":18433.0,"equity_ratio":48.4,"ebit_margin":2.8,"ebitda_margin":11.7,"net_margin":-0.4,"current_ratio":1.8,"net_debt_ebitda":1.8,"working_capital":22153.0,"wc_pct_rev":25.4,"roe":-1.0},{"year":2023,"revenue":68902.0,"cogs":52506.0,"gross_profit":16396.0,"sga":10294.0,"rnd":2130.0,"opex":14156.0,"ebit":2240.0,"other_income":-820.0,"da":3921.0,"ebitda":6202.0,"ebt":1420.0,"tax":1041.0,"net_income":225.0,"total_assets":79927.0,"total_equity":36645.0,"total_liabilities":43282.0,"net_debt":18723.0,"equity_ratio":45.8,"ebit_margin":3.3,"ebitda_margin":9.0,"net_margin":0.3,"current_ratio":2.0,"net_debt_ebitda":3.0,"working_capital":19495.0,"wc_pct_rev":28.3,"roe":0.6},{"year":2024,"revenue":65260.0,"cogs":48174.0,"gross_profit":17086.0,"sga":10248.0,"rnd":2061.0,"opex":15053.0,"ebit":2033.0,"other_income":36.0,"da":4648.0,"ebitda":7771.0,"ebt":2069.0,"tax":616.0,"net_income":1298.0,"total_assets":80415.0,"total_equity":36883.0,"total_liabilities":43532.0,"net_debt":21081.0,"equity_ratio":45.9,"ebit_margin":3.1,"ebitda_margin":11.9,"net_margin":2.0,"current_ratio":1.8,"net_debt_ebitda":2.7,"working_capital":19085.0,"wc_pct_rev":29.2,"roe":3.5},{"year":2025,"revenue":59657.0,"cogs":45415.0,"gross_profit":14242.0,"sga":8852.0,"rnd":1995.0,"opex":11682.0,"ebit":2560.0,"other_income":-113.0,"da":3697.0,"ebitda":6257.0,"ebt":2447.0,"tax":907.0,"net_income":1619.0,"total_assets":78021.0,"total_equity":34337.0,"total_liabilities":43684.0,"net_debt":21751.0,"equity_ratio":44.0,"ebit_margin":4.3,"ebitda_margin":10.5,"net_margin":2.7,"current_ratio":1.9,"net_debt_ebitda":3.5,"working_capital":16772.0,"wc_pct_rev":28.1,"roe":4.7}]
+</script>
+
+<script>
+const data = JSON.parse(document.getElementById('basf-data').textContent);
+const fmt = n => n.toLocaleString('en-US', {maximumFractionDigits:0});
+const fmtSigned = n => (n>0?'+':'') + n.toLocaleString('en-US', {maximumFractionDigits:0});
+const last = data[data.length-1];
+const prev = data[data.length-2];
+
+// ---- Color tokens pulled from CSS ----
+const cs = getComputedStyle(document.documentElement);
+const COL = {
+  ink: cs.getPropertyValue('--ink').trim(),
+  steel: cs.getPropertyValue('--steel').trim(),
+  steelDim: cs.getPropertyValue('--steel-dim').trim(),
+  rust: cs.getPropertyValue('--rust').trim(),
+  moss: cs.getPropertyValue('--moss').trim(),
+  line: cs.getPropertyValue('--line').trim(),
+  muted: cs.getPropertyValue('--muted').trim(),
+};
+Chart.defaults.font.family = "'IBM Plex Mono', monospace";
+Chart.defaults.font.size = 11;
+Chart.defaults.color = COL.muted;
+
+// ---- KPI STRIP ----
+const kpis = [
+  {
+    label: 'FY2025 Revenue',
+    value: '€' + fmt(last.revenue) + 'm',
+    delta: ((last.revenue/prev.revenue-1)*100).toFixed(1) + '% vs FY24'
+  },
+  {
+    label: 'EBIT margin',
+    value: last.ebit_margin.toFixed(1) + '%',
+    delta: fmtSigned((last.ebit_margin-prev.ebit_margin).toFixed(1)) + 'pp vs FY24',
+    up:true
+  },
+  {
+    label: 'Net debt / EBITDA',
+    value: last.net_debt_ebitda.toFixed(1) + 'x',
+    delta: fmtSigned((last.net_debt_ebitda-prev.net_debt_ebitda).toFixed(1)) + 'x vs FY24'
+  },
+  {
+    label: 'Equity ratio',
+    value: last.equity_ratio.toFixed(1) + '%',
+    delta: fmtSigned((last.equity_ratio-prev.equity_ratio).toFixed(1)) + 'pp vs FY24'
+  }
+];
+const strip = document.getElementById('kpiStrip');
+kpis.forEach(k=>{
+  const isNeg = k.delta.trim().startsWith('-');
+  const goodDirectionIsUp = k.up===true;
+  const cls = isNeg ? (goodDirectionIsUp?'delta-down':'delta-up') : (goodDirectionIsUp?'delta-up':'delta-down');
+  strip.innerHTML += `<div class="kpi">
+    <div class="kpi-label">${k.label}</div>
+    <div class="kpi-value">${k.value}</div>
+    <div class="kpi-delta ${cls}">${k.delta}</div>
+  </div>`;
+});
+
+// ---- TREND CHART ----
+new Chart(document.getElementById('trendChart'), {
+  type:'bar',
+  data:{
+    labels: data.map(d=>d.year),
+    datasets:[
+      {
+        type:'bar',
+        label:'Revenue (€m)',
+        data: data.map(d=>d.revenue),
+        backgroundColor: COL.line,
+        borderRadius:1,
+        yAxisID:'y'
+      },
+      {
+        type:'line',
+        label:'EBIT margin (%)',
+        data: data.map(d=>d.ebit_margin),
+        borderColor: COL.rust,
+        backgroundColor: COL.rust,
+        pointRadius:2.5,
+        borderWidth:2,
+        yAxisID:'y1',
+        tension:0.25
+      },
+      {
+        type:'line',
+        label:'EBITDA margin (%)',
+        data: data.map(d=>d.ebitda_margin),
+        borderColor: COL.steel,
+        backgroundColor: COL.steel,
+        pointRadius:2.5,
+        borderWidth:2,
+        yAxisID:'y1',
+        tension:0.25
+      }
+    ]
+  },
+  options:{
+    responsive:true,
+    interaction:{mode:'index', intersect:false},
+    plugins:{ legend:{position:'bottom', labels:{boxWidth:10, boxHeight:10, usePointStyle:true}} },
+    scales:{
+      y:{ position:'left', grid:{color:COL.line}, ticks:{callback:v=>'€'+(v/1000).toFixed(0)+'bn'} },
+      y1:{ position:'right', grid:{display:false}, ticks:{callback:v=>v+'%'} },
+      x:{ grid:{display:false} }
+    }
+  }
+});
+
+// ---- LEDGER BRIDGE (FY2024 -> FY2025) ----
+const bridgeRows = [
+  {idx:'1', label:'Revenue', v: last.revenue - prev.revenue},
+  {idx:'2', label:'Cost of Revenue', v: -(last.cogs - prev.cogs)},
+  {idx:'3', label:'Gross Profit', v: last.gross_profit - prev.gross_profit, subtotal:true},
+  {idx:'4a', label:'SG&A', v: -(last.sga - prev.sga)},
+  {idx:'4b', label:'R&D Expenses', v: -(last.rnd - prev.rnd)},
+  {idx:'6', label:'Other Income / Expense, net', v: last.other_income - prev.other_income},
+  {idx:'5', label:'EBIT (Operating Income)', v: last.ebit - prev.ebit, total:true},
+];
+const maxAbs = Math.max(...bridgeRows.map(r=>Math.abs(r.v)));
+const ledgerEl = document.getElementById('ledgerBridge');
+bridgeRows.forEach(r=>{
+  const pct = Math.min(100, Math.abs(r.v)/maxAbs*100);
+  const neg = r.v < 0;
+  const barSide = neg ? `right:50%; width:${pct/2}%;` : `left:50%; width:${pct/2}%;`;
+  ledgerEl.innerHTML += `<div class="ledger-row ${r.total?'total':''}">
+    <div class="ledger-idx">${r.idx}</div>
+    <div class="ledger-label">${r.label}</div>
+    <div class="ledger-val ${neg?'neg':'pos'}">${fmtSigned(Math.round(r.v))}m</div>
+    <div class="ledger-bar-track"><div class="ledger-bar ${neg?'neg':''}" style="${barSide}"></div></div>
+  </div>`;
+});
+
+// ---- EQUITY RATIO CHART ----
+new Chart(document.getElementById('equityChart'), {
+  type:'line',
+  data:{
+    labels: data.map(d=>d.year),
+    datasets:[{
+      label:'Equity ratio (%)',
+      data: data.map(d=>d.equity_ratio),
+      borderColor: COL.steel,
+      backgroundColor: 'rgba(62,98,89,0.08)',
+      fill:true,
+      pointRadius:2,
+      borderWidth:2,
+      tension:0.25
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{ legend:{display:false}, title:{display:true, text:'Equity ratio (%)', align:'start', color: COL.ink, font:{size:12, family:"'IBM Plex Mono', monospace"}} },
+    scales:{ y:{ grid:{color:COL.line}, ticks:{callback:v=>v+'%'} }, x:{ grid:{display:false} } }
+  }
+});
+
+// ---- LEVERAGE CHART ----
+new Chart(document.getElementById('leverageChart'), {
+  type:'line',
+  data:{
+    labels: data.map(d=>d.year),
+    datasets:[{
+      label:'Net debt / EBITDA (x)',
+      data: data.map(d=>d.net_debt_ebitda),
+      borderColor: COL.rust,
+      backgroundColor: 'rgba(181,80,47,0.08)',
+      fill:true,
+      pointRadius:2,
+      borderWidth:2,
+      tension:0.25
+    }]
+  },
+  options:{
+    responsive:true,
+    plugins:{ legend:{display:false}, title:{display:true, text:'Net debt / EBITDA (x)', align:'start', color: COL.ink, font:{size:12, family:"'IBM Plex Mono', monospace"}} },
+    scales:{ y:{ grid:{color:COL.line}, ticks:{callback:v=>v+'x'} }, x:{ grid:{display:false} } }
+  }
+});
+</script>
+</body>
+</html>
